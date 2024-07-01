@@ -17,7 +17,7 @@ def generate_sample_data():
         {'instance_id': 5, 'spatial_feature_type': 'B', 'geometry': Point(15.1, 6)},
         {'instance_id': 1, 'spatial_feature_type': 'C', 'geometry': Point(8.65, 1)},
         {'instance_id': 2, 'spatial_feature_type': 'C', 'geometry': Point(0.1, 3.3)},
-        {'instance_id': 3, 'spatial_feature_type': 'C', 'geometry': Point(14.2, 5.5)},
+        {'instance_id': 3, 'spatial_feature_type': 'C', 'geometry': Point(14.2, 5.5)}
     ])
 
     return data
