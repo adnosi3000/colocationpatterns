@@ -1,5 +1,14 @@
 <h1>Co-location Patterns Library</h1>
-Python package for discovering co-location patterns from POIs datasets (spatial data).
+<p>Python package for discovering co-location patterns from POIs datasets (spatial data).</p>
+<p>
+<ul style="list-style-type: none;padding: 0;margin: 0">
+    <li><a href="https://github.com/adnosi3000/colocationpatterns?tab=readme-ov-file#1-package-overview">1. Package overview</a></li>
+    <li><a href="https://github.com/adnosi3000/colocationpatterns?tab=readme-ov-file#2-further-work">2. Further work</a></li>
+    <li><a href="https://github.com/adnosi3000/colocationpatterns?tab=readme-ov-file#3-known-issues">3. Known issues</a></li>
+    <li><a href="https://github.com/adnosi3000/colocationpatterns?tab=readme-ov-file#4-installation">4. Installation</a></li>
+    <li><a href="https://github.com/adnosi3000/colocationpatterns?tab=readme-ov-file#5-references">5. References</a></li>
+</ul>
+</p>
 
 <h2>1. Package overview</h2>
 <h3>1.1. General description of functionality</h3>
@@ -70,10 +79,24 @@ If participation index exceeds the established threshold consider candidate as a
 The algorithm may be presented as showed on Figure 2:
 <figure>
     <img src="img/colocation tables example.jpg">
-    <figcaption><i>Figure 2: Generalized algortihm for mining co-location patterns, based on [1]</i></figcaption>
+    <figcaption><i>Figure 2: Generalized algortihm for mining co-location patterns, based on [1]. Elementary
+tables for k=1 level (a), canditate tables for k=2 level (b), candidate table for k=3 leve (c) with calculated
+participation index.</i></figcaption>
 </figure>
 </p>
+<h3>1.4. Example usage</h3>
+<p>
+```python
+from colocationpatterns.sample_data import generate_sample_data
+from colocationpatterns.miner import ColocationMiner
 
+data = generate_sample_data()
+cm = ColocationMiner(data, 'spatial_feature_type', 'instance_id', 2.95)
+colocations = cm.mine(0.5)
+print(colocations)
+print(cm.statistics)
+```
+</p>
 
 <h2>2. Further work</h2>
 <p><ul>
