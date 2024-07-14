@@ -42,28 +42,29 @@ as neighbourhood relation definition.</p>
 <p>Following co-locations may be found (if <b>R-proximity</b> for neighbourhood
 is set for 2.95 and <b>participation index</b> threshold is 0.5:
 <ol>
-    <li>co-location of features: {B, C}</li>
-    <li>co-location of features: {C, A}</li>
+    <li>co-location of features $f_B$ and $f_C$: {B, C}</li>
+    <li>co-location of features $f_C$ and $f_A$: {C, A}</li>
 </ol>
 </p>
 
 <h3>Algorithm description (for sample POIs)</h3>
 <p><ol>
-    <li>Create elementary tables (k=1 co-location level) using <code>spatial_feature_type</code> attribute.</li>
-    <li>For k=1 co-location level every unique spatial feature type is a colocation. 
+    <li>Create elementary tables ($k=1$ co-location level) using $spatial_feature_type$ attribute.</li>
+    <li>For $k=1$ co-location level every unique spatial feature type is a colocation. 
 It is ignored when calculating statistics</li>
-    <li>Increase co-location lever by one (k=2).</li>
-    <li>Create co-location candidates k=2 tables {A, B}, {A, C}, {B, C} (created according to the Cartesian product principle)</li>
-    <li>For each candidate table calculate participation ratio (<i>pr</i>) and participation index (<i>pi</i>)
+    <li>Increase co-location lever by one ($k=2$).</li>
+    <li>Create co-location candidates $k=2$ tables {A, B}, {A, C}, {B, C} (created according to the Cartesian product principle)</li>
+    <li>For each candidate table $c$ calculate participation ratio ($pr$) and participation index ($pi$)
 using given formulas:
         <ul>
-            <li>$pr(c, \phi_i) = \frac{\pi_{\phi_i} (|\text{candidate\_table}(c)|)}{|\text{elementary\_table}(\phi_i)|}$</li>
-            <li>pi=...</li>
+            <li>$pr(c, f_i) = \frac{\pi_{f_i} (|\text{candidate\_table}(c)|)}{|\text{elementary\_table}(f_i)|}$</li>
+            <li>$pi(c) = \min_{i=1}^{k} \pr(c, f_i)$</li>
         </ul>
+    Where $f_i$ is feature type and $pi_{f_i}$ is a operation for duplicated feature type instances elimination
     If participation index exceeds the established threshold consider candidate as a colocation.
     </li>
-    <li>Increase co-location lever by one (k=3).</li>
-    <li>Create co-location candidate k=3 table {A, B, C} and calculate participation ratio and participation index.
+    <li>Increase co-location lever by one ($k=3$).</li>
+    <li>Create co-location candidate $k=3$ table {A, B, C} and calculate participation ratio and participation index.
 If participation index exceeds the established threshold consider candidate as a colocation.</li>
 </ol>
 The algorithm may be presented as showed on Figure 2:
