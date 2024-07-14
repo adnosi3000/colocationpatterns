@@ -86,6 +86,7 @@ participation index.</i></figcaption>
 </p>
 <h3>1.4. Example usage</h3>
 <p>
+
 ```python
 from colocationpatterns.sample_data import generate_sample_data
 from colocationpatterns.miner import ColocationMiner
