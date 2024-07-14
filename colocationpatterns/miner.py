@@ -7,7 +7,12 @@ from colocationpatterns.sample_data import generate_sample_data
 
 class ColocationMiner:
 
-    def __init__(self, data: GeoDataFrame, feature_type_column: str, feature_type_unique_id_column: str, neighbourhood: float):
+    def __init__(
+        self,
+        data: GeoDataFrame,
+        feature_type_column: str,
+        feature_type_unique_id_column: str,
+        neighbourhood: float):
 
         self.data = data # all events instances (id, event tpy, location, other attributes)
         self.feature_type_column = feature_type_column # column to recognize event type
@@ -15,16 +20,14 @@ class ColocationMiner:
         self.ET = set(data[feature_type_column].unique()) # set of event types
         self.R = neighbourhood # max distance to consider neighbour as colocation
         self.K = data[feature_type_column].nunique() # number of event types
-        # self.table_ids_iterator = iter(range(0, sum(((factorial(self.K))//(factorial(i)*factorial(self.K-i)) for i in range(1, self.K+1)))))
         self.tables = {k: {} for k in range(1, self.K+1)} # structure to store tables based on size-k colocation
+        self.statistics = None
+        self.colocations = None
 
-    def calculate_participation_ratio(self, colocation, feature_type, k):
+    def calculate_participation_ratio(self, candidate_table, feature_type):
 
         all_feature_types = len(self.tables[1][feature_type])
-        colocation_table = self.tables[k][colocation]
-        if colocation_table is None:
-            return None
-        features_in_colocation = colocation_table[feature_type].nunique()
+        features_in_colocation = candidate_table[feature_type].nunique()
 
         return features_in_colocation/all_feature_types
 
@@ -38,12 +41,12 @@ class ColocationMiner:
 
     def merge_by_neighbourhood(self, tables_id:tuple):
 
-        result = cm.tables[1][tables_id[0]].copy()
+        result = self.tables[1][tables_id[0]].copy()
         result['geometry'] = result['geometry'].buffer(self.R)
         
         for table_id in tables_id[1::]:
         
-            table = cm.tables[1][table_id].copy()
+            table = self.tables[1][table_id].copy()
             merged = sjoin(result, table)
             if merged.empty: return None
             merged.drop(columns='index_right', inplace=True)
@@ -55,7 +58,9 @@ class ColocationMiner:
         return result
     
     
-    def __call__(self):
+    def mine(self, min_participation_index: float, store_higher_lvl_tables:bool=False, verbose:bool=False):
+
+        statistics = {}
 
         # Generate co-location candidates and compute statistics
         for k in range(1, self.K+1):
@@ -63,7 +68,7 @@ class ColocationMiner:
             for colocation in combinations(self.ET, k):
 
                 if k == 1: # elementary tables
-                    print('Creating elementary tables')
+                    if verbose: print('Creating elementary tables')
                     self.tables[k] =  { table_id:
                         GeoDataFrame(
                             [{
@@ -74,19 +79,27 @@ class ColocationMiner:
                     }
                     break
 
-                
-
-                print(f'Creating table k_level = {k} for tables {colocation}')
+                if verbose: print(f'Creating table k_level = {k} for tables {colocation}')
                 table = self.merge_by_neighbourhood(colocation)
-                self.tables[k][colocation] = table
                 if table is None:
+                    if verbose: print(f'No points for co-location candidate {colocation} to match neighbourhood definition R={self.R}')
                     continue
-                prs = []
+                if store_higher_lvl_tables:
+                    self.tables[k][colocation] = table
+                
+                statistics[colocation] = {'participation_ratios': {}}
                 for feature_type in colocation:
-                    pr = self.calculate_participation_ratio(colocation, feature_type, k)
-                    prs.append(pr)
-                    print(f'\tParticipation ratio for {feature_type} in colocation {colocation} is {pr}')
+                    pr = self.calculate_participation_ratio(table, feature_type)
+                    statistics[colocation]['participation_ratios'][feature_type] = pr
+                    if verbose: print(f'\tParticipation ratio for {feature_type} in colocation {colocation} is {pr}')
                 
-                pi = self.calculate_participation_index(prs)
-                print(f'\tParticipation index for colocation {colocation} is {pi}')
-                
+                pi = self.calculate_participation_index(statistics[colocation]['participation_ratios'].values())
+                statistics[colocation]['participation_index'] = pi
+                if verbose: print(f'\tParticipation index for colocation {colocation} is {pi}')
+
+                statistics[colocation]['colocation'] = pi >= min_participation_index
+    
+        self.statistics = statistics
+        self.colocations = list(filter(lambda key: self.statistics[key]['colocation'], self.statistics.keys()))
+
+        return self.colocations

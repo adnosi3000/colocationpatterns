@@ -1,7 +1,9 @@
 from numbers import Number
 
-from pytest import fixture
+from pytest import fixture, mark
 from geopandas import GeoDataFrame
+from pandas import DataFrame
+from shapely.geometry import Point
 
 from colocationpatterns.sample_data import generate_sample_data
 from colocationpatterns.miner import ColocationMiner
@@ -24,6 +26,8 @@ def test_miner_init(miner_from_geodataframe):
     assert isinstance(miner_from_geodataframe.R, Number)
     assert isinstance(miner_from_geodataframe.K, Number)
     assert isinstance(miner_from_geodataframe.tables, dict)
+    assert miner_from_geodataframe.statistics is None
+    assert miner_from_geodataframe.colocations is None
 
     # validate values based on sample data
     assert miner_from_geodataframe.feature_type_column == 'spatial_feature_type'
@@ -32,5 +36,87 @@ def test_miner_init(miner_from_geodataframe):
     assert miner_from_geodataframe.R == 2.95
     assert miner_from_geodataframe.K == 3
     assert miner_from_geodataframe.tables == {1: {}, 2: {}, 3:{}}
+    assert miner_from_geodataframe.statistics is None
+    assert miner_from_geodataframe.colocations is None
 
+
+@mark.parametrize('test_table', [
+    DataFrame([
+        {'B': 1, 'A': 1, 'geometry': None},
+        {'B': 4, 'A': 2, 'geometry': None},
+        {'B': 4, 'A': 3, 'geometry': None}
+    ]),
+    DataFrame([
+        {'C': 1, 'A': 1, 'geometry': None},
+        {'C': 2, 'A': 2, 'geometry': None},
+        {'C': 5, 'A': 3, 'geometry': None},
+        {'C': 7, 'A': 3, 'geometry': None},
+        {'C': 2, 'A': 4, 'geometry': None}
+    ]),
+    DataFrame(columns=['A', 'B'])
+])
+def test_calculate_participation_ratio(miner_from_geodataframe, test_table):
+
+    miner_from_geodataframe.tables[1]['A'] = DataFrame([
+        {'A': 1, 'geometry': None},
+        {'A': 2, 'geometry': None},
+        {'A': 3, 'geometry': None},
+        {'A': 4, 'geometry': None}
+    ])
+
+    out = miner_from_geodataframe.calculate_participation_ratio(test_table, 'A')
+    assert isinstance(out, Number)
+    assert 1 >= out >= 0
+    assert out == test_table['A'].nunique()/4
+
+@mark.parametrize('v', [(1, 2, 3), (-1, 0, 1), (0.1, 0.4, 0.3)])
+def test_calculate_participation_index(miner_from_geodataframe, v):
+
+    out = miner_from_geodataframe.calculate_participation_index(v)
+    assert isinstance(out, Number)
+    assert out == min(v)
+
+@mark.parametrize('R', [1, 10, 15, 20])
+def test_merge_by_neighbourhood(miner_from_geodataframe, R):
+
+    miner_from_geodataframe.R = R
+    miner_from_geodataframe.tables[1]['A'] = GeoDataFrame([
+        {'A': 1, 'geometry': Point(0, 0)},
+        {'A': 2, 'geometry': Point(0, 1)},
+        {'A': 3, 'geometry': Point(1, 1)},
+        {'A': 4, 'geometry': Point(0, 1)}
+    ])
+    miner_from_geodataframe.tables[1]['B'] = GeoDataFrame([
+        {'B': 1, 'geometry': Point(10, 10)},
+        {'B': 2, 'geometry': Point(10, 20)},
+        {'B': 3, 'geometry': Point(20, 20)},
+        {'B': 4, 'geometry': Point(20, 10)}
+    ])
+
+    out = miner_from_geodataframe.merge_by_neighbourhood(('A', 'B'))
+
+    assert isinstance(out, GeoDataFrame) if R >= Point(1, 1).distance(Point(10, 10)) else (out is None)
+    # assert len(out) == 4 if R
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
