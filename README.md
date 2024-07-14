@@ -50,7 +50,7 @@ is set for 2.95 and <b>participation index</b> threshold is 0.5:
 <h3>Algorithm description (for sample POIs)</h3>
 <p><ol>
     <li>Create elementary tables ($k=1$ co-location level) using spatial_feature_type attribute.</li>
-    <li>For $k=1$ co-location level every unique spatial feature type is a colocation with participation index $\pi=1$. 
+    <li>For $k=1$ co-location level every unique spatial feature type is a colocation with participation index $pi=1$. 
 It is ignored when calculating statistics.</li>
     <li>Increment co-location level by one ($k=2$).</li>
     <li>Create co-location candidates $k=2$ tables {A, B}, {A, C}, {B, C} (created according to the Cartesian product principle).</li>
@@ -60,7 +60,7 @@ using given formulas:
             <li>$pr(c, f_i) = \frac{\pi_{f_i} (|c|)}{|\text{elementary\_table}(f_i)|}$</li>
             <li>$pi(c) = \min \limits_{i=1}^{k} \left\{ pr(c, f_i) \right\}$</li>
         </ul>
-    Where $f_i$ is feature type and $pi_{f_i}$ is a operation for duplicated feature type instances elimination.
+    Where $f_i$ is feature type and $\pi_{f_i}$ is a operation for duplicated feature type instances elimination.
     If participation index exceeds the established threshold consider candidate as a colocation.
     </li>
     <li>Increment co-location level by one ($k=3$).</li>
