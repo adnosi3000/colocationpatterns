@@ -47,7 +47,7 @@ is set for 2.95 and <b>participation index</b> threshold is 0.5:
 </ol>
 </p>
 
-<h3>Algorithm description (for sample POIs)</h3>
+<h3>1.3. Algorithm description (for sample POIs)</h3>
 <p><ol>
     <li>Create elementary tables ($k=1$ co-location level) using spatial_feature_type attribute.</li>
     <li>For $k=1$ co-location level every unique spatial feature type is a colocation with participation index $pi=1$. 
