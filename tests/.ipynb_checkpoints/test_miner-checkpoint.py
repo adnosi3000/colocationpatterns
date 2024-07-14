@@ -69,15 +69,20 @@ def test_calculate_participation_index(miner_from_geodataframe, v):
     assert isinstance(out, Number)
     assert out == min(v)
 
-@mark.parametrize('R', [1, 10, 15, 20])
+@mark.parametrize('R', [1, 2, 3, 4])
 def test_merge_by_neighbourhood(miner_from_geodataframe, R):
 
     miner_from_geodataframe.R = R
     out = miner_from_geodataframe.merge_by_neighbourhood(('A', 'B'))
 
-    assert isinstance(out, GeoDataFrame) or (out is None)
-
-    
+    if out is not None:
+        assert isinstance(out, GeoDataFrame)
+        assert 'A' in out.columns
+        assert 'B' in out.columns
+        assert 'geometry' in out.columns
+        assert all(out['geometry'].map(lambda x: x.geom_type) == 'Polygon')
+        assert len(out.columns) == 3
+    assert {2: 1, 3: 3, 4: 4}.get(R, 0) == len(out) if out is not None else out is None
 
 
 
