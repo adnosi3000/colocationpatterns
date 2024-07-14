@@ -57,8 +57,7 @@ It is ignored when calculating statistics</li>
     <li>For each candidate table calculate participation ratio (<i>pr</i>) and participation index (<i>pi</i>)
 using given formulas:
         <ul>
-            <li>pr(c, \phi_i) = \frac{\pi_{\phi_i} (|\text{candidate\_table}(c)|)}{|\text{elementary\_table}(\phi_i)|}
-</li>
+            <li>$pr(c, \phi_i) = \frac{\pi_{\phi_i} (|\text{candidate\_table}(c)|)}{|\text{elementary\_table}(\phi_i)|}$</li>
             <li>pi=...</li>
         </ul>
     If participation index exceeds the established threshold consider candidate as a colocation.
