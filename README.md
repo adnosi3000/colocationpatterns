@@ -58,7 +58,7 @@ It is ignored when calculating statistics</li>
 using given formulas:
         <ul>
             <li>$pr(c, f_i) = \frac{\pi_{f_i} (|\text{candidate\_table}(c)|)}{|\text{elementary\_table}(f_i)|}$</li>
-            <li>$pi(c) = \min_{i=1}^{k} \pr(c, f_i)$</li>
+            <li>$\pi(c) = \min \limits_{i=1}^{k} \left\{ \pr(c, f_i) \right\}$</li>
         </ul>
     Where $f_i$ is feature type and $pi_{f_i}$ is a operation for duplicated feature type instances elimination
     If participation index exceeds the established threshold consider candidate as a colocation.
