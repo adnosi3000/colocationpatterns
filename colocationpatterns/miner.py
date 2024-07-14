@@ -12,21 +12,22 @@ class ColocationMiner:
         data: GeoDataFrame,
         feature_type_column: str,
         feature_type_unique_id_column: str,
-        neighbourhood: float):
+        neighbourhood: float
+    ):
 
         self.data = data # all events instances (id, event tpy, location, other attributes)
         self.feature_type_column = feature_type_column # column to recognize event type
         self.feature_type_unique_id_column = feature_type_unique_id_column # column with id unique within event type
         self.ET = set(data[feature_type_column].unique()) # set of event types
-        self.R = neighbourhood # max distance to consider neighbour as colocation
         self.K = data[feature_type_column].nunique() # number of event types
-        self.tables = {k: {} for k in range(1, self.K+1)} # structure to store tables based on size-k colocation
+        self.R = neighbourhood # radius to set euclidean, neighbourhood relation
+        self.tables = {k: {} for k in range(2, self.K+1)} # structure to store tables based on size-k colocation
         self.statistics = None
         self.colocations = None
 
     def calculate_participation_ratio(self, candidate_table, feature_type):
 
-        all_feature_types = len(self.tables[1][feature_type])
+        all_feature_types = len(self.get_elementary_table(feature_type))
         features_in_colocation = candidate_table[feature_type].nunique()
 
         return features_in_colocation/all_feature_types
@@ -39,14 +40,21 @@ class ColocationMiner:
 
         pass
 
-    def merge_by_neighbourhood(self, tables_id:tuple):
+    def get_elementary_table(self, feature_type):
 
-        result = self.tables[1][tables_id[0]].copy()
+        return GeoDataFrame([{
+            feature_type: getattr(event, self.feature_type_unique_id_column),
+            'geometry': event.geometry
+        } for event in self.data[self.data[self.feature_type_column]==feature_type].itertuples()])
+
+    def merge_by_neighbourhood(self, tables_id:tuple):
+    
+        result = self.get_elementary_table(tables_id[0])    
         result['geometry'] = result['geometry'].buffer(self.R)
         
         for table_id in tables_id[1::]:
-        
-            table = self.tables[1][table_id].copy()
+
+            table = self.get_elementary_table(table_id)
             merged = sjoin(result, table)
             if merged.empty: return None
             merged.drop(columns='index_right', inplace=True)
@@ -62,22 +70,10 @@ class ColocationMiner:
 
         statistics = {}
 
-        # Generate co-location candidates and compute statistics
-        for k in range(1, self.K+1):
+        # Generate co-location candidates and compute statistics starting from lvl k=2
+        for k in range(2, self.K+1):
             
             for colocation in combinations(self.ET, k):
-
-                if k == 1: # elementary tables
-                    if verbose: print('Creating elementary tables')
-                    self.tables[k] =  { table_id:
-                        GeoDataFrame(
-                            [{
-                                table_id: getattr(event, self.feature_type_unique_id_column),
-                                'geometry': event.geometry
-                            } for event in table[[self.feature_type_unique_id_column, 'geometry']].itertuples()]
-                        ) for table_id, table in self.data.groupby(by=self.feature_type_column, as_index=False)
-                    }
-                    break
 
                 if verbose: print(f'Creating table k_level = {k} for tables {colocation}')
                 table = self.merge_by_neighbourhood(colocation)
