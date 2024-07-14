@@ -30,12 +30,14 @@ as neighbourhood relation definition.</p>
     <tr style="color:red;"><td>3</td><td>C</td><td>Point(14.2, 5.5)</td></tr>
 </table>
 
-<p>In two-dimensional, euclidean space POIs distribution may be presented as on Figure 1.</p>
+<p>In two-dimensional, euclidean space POIs distribution may be presented as on Figure 1.
 
 <figure>
     <img src="img/sample_dataset.png">
     <figcaption><i>Figure 1: Spatial distribution of sample POI data set</i></figcaption>
 </figure>
+
+</p>
 
 <p>Following co-locations may be found (if <b>R-proximity</b> for neighbourhood
 is set for 2.95 and <b>participation index</b> threshold is 0.5:
@@ -55,7 +57,8 @@ It is ignored when calculating statistics</li>
     <li>For each candidate table calculate participation ratio (<i>pr</i>) and participation index (<i>pi</i>)
 using given formulas:
         <ul>
-            <li>pr=...</li>
+            <li>pr(c, \phi_i) = \frac{\pi_{\phi_i} (|\text{candidate\_table}(c)|)}{|\text{elementary\_table}(\phi_i)|}
+</li>
             <li>pi=...</li>
         </ul>
     If participation index exceeds the established threshold consider candidate as a colocation.
